@@ -23,4 +23,5 @@ interface UrlServcies {
             @Query("query") query: String,
             @Query("page") page: String
     ): Observable<SearchModel>
+
 }

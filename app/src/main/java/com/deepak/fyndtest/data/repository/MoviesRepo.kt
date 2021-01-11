@@ -10,7 +10,9 @@ import com.deepak.fyndtest.ui.models.SearchResultsItem
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.ObservableSource
+import java.util.*
 import javax.inject.Singleton
+import kotlin.collections.ArrayList
 
 /**
  * Created by Deepak Kumar Verma on 10-01-2021.
@@ -24,12 +26,21 @@ class MoviesRepo(private val urlServcies: UrlServcies, private val moviesDao: Mo
     fun loadmovies(page:Long) : Observable<Resource<List<SearchResultsItem>>>{
         return object : NetworkBoundResource<List<SearchResultsItem>,SearchModel>(){
             override fun saveCallResult(item: SearchModel) {
-                moviesDao.insertMovies(item.results as List<SearchResultsItem>)
+                val movietiem = ArrayList<SearchResultsItem>()
+                for (searchitem in item.results!!) {
+                    searchitem?.page = item.page!!
+                    searchitem?.totalPages = item.totalPages!!
+                    if (searchitem != null) {
+                        movietiem.add(searchitem)
+                    }
+                }
+                moviesDao.insertMovies(movietiem as List<SearchResultsItem>)
             }
 
             override fun shouldFetch(): Boolean {
+                return true
 
-                return moviesDao.getMovies().size == 0 ?: true
+           //     return moviesDao.getMovies().size == 0 ?: true
             }
 
             override fun loadFromDb(): Flowable<List<SearchResultsItem>> {
@@ -60,11 +71,6 @@ class MoviesRepo(private val urlServcies: UrlServcies, private val moviesDao: Mo
             }
 
             override fun loadFromDb(): Flowable<List<SearchResultsItem>> {
-              //  val movieEntities = moviesDao.getMoviesByPage()
-//                return if (movieEntities == null || movieEntities.isEmpty()) {
-//                    Flowable.empty()
-//                } else Flowable.just(SearchResultsItem().getMoviesByType(query, movieEntities))
-
                 val movieEntities = moviesDao.loadHamsters(query)
                 return Flowable.just(movieEntities)
             }

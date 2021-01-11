@@ -40,4 +40,14 @@ class MainViewModel @Inject constructor(urlServcies: UrlServcies,moviesDao: Movi
         compositeDisposable.clear()
     }
 
+    fun isLastPage(): Boolean {
+        if(moviesLiveData.value != null &&
+            moviesLiveData.value!!.data != null &&
+            !moviesLiveData.value!!.data!!.isEmpty()) {
+            return moviesLiveData.value!!.data!![0].isLastPage()
+        }
+
+        return true
+    }
+
 }

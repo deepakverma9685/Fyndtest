@@ -3,6 +3,7 @@ package com.deepak.fyndtest.ui.models
 import androidx.room.Entity
 import com.deepak.fyndtest.utils.AppConstants
 import com.google.gson.annotations.SerializedName
+import java.io.Serializable
 import java.util.*
 
 data class SearchModel(
@@ -23,8 +24,9 @@ data class SearchModel(
 @Entity(primaryKeys = ["id"])
 data class SearchResultsItem(
 
-//	var page: Long,
-//	var totalPages: Long,
+	var page: Int,
+	var totalPages: Int,
+	var favourites: Boolean = false,
 
 	@field:SerializedName("overview")
 	val overview: String? = null,
@@ -40,9 +42,6 @@ data class SearchResultsItem(
 
 	@field:SerializedName("title")
 	val title: String? = null,
-
-//	@field:SerializedName("genre_ids")
-//	val genreIds: List<Int?>? = null,
 
 	@field:SerializedName("poster_path")
 	var posterPath: String? = null,
@@ -67,7 +66,7 @@ data class SearchResultsItem(
 
 	@field:SerializedName("vote_count")
 	val voteCount: Int? = null
-){
+): Serializable{
 	fun getFormattedPosterPath(): String? {
 		if (posterPath != null && !posterPath!!.startsWith("http")) {
 			posterPath = String.format(AppConstants.IMAGE_URL, posterPath)
@@ -75,19 +74,10 @@ data class SearchResultsItem(
 		return posterPath
 	}
 
-	fun getMoviesByType(type: String, movieEntities: List<SearchResultsItem>): List<SearchResultsItem> {
-		val finalList: MutableList<SearchResultsItem> = ArrayList()
-		for (movieEntity in movieEntities) {
-			var add = false
-			for (itemsModel in movieEntities) {
-				if (itemsModel.title?.contains(type) == true) {
-					add = true
-				}
-			}
-			if (add) finalList.add(movieEntity)
-		}
-		return finalList
+	fun isLastPage() : Boolean {
+		return page >= totalPages
 	}
+
 }
 
 

@@ -10,7 +10,7 @@ import com.deepak.fyndtest.ui.models.SearchResultsItem
  * Company Shantiinfotech.
  */
 
-@Database(entities = [SearchResultsItem::class], version = 3, exportSchema = false)
+@Database(entities = [SearchResultsItem::class], version = 4, exportSchema = false)
 abstract class  FyndDatabase : RoomDatabase(){
     abstract fun movieDao(): MoviesDao
 }

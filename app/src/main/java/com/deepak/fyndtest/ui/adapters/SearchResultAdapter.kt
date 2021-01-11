@@ -70,6 +70,12 @@ class SearchResultAdapter(
         notifyDataSetChanged()
     }
 
+    fun setItems(items: List<SearchResultsItem>) {
+        val startPosition = this.mSearchResultsItemList.size
+        this.mSearchResultsItemList.addAll(items)
+        notifyItemRangeChanged(startPosition, items.size)
+    }
+
     private fun dataSetChanged() {
         notifyDataSetChanged()
     }

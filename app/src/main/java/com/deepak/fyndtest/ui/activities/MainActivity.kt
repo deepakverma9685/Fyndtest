@@ -1,9 +1,13 @@
 package com.deepak.fyndtest.ui.activities
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -14,11 +18,11 @@ import com.deepak.fyndtest.databinding.ActivityMainBinding
 import com.deepak.fyndtest.ui.adapters.SearchResultAdapter
 import com.deepak.fyndtest.ui.models.SearchResultsItem
 import com.deepak.fyndtest.ui.viewmodels.MainViewModel
-import com.deepak.fyndtest.ui.viewmodels.SearchViewModel
 import com.deepak.fyndtest.utils.EqualSpacing
 import com.deepak.fyndtest.utils.RecyclerViewPaginator
 import dagger.android.AndroidInjection
 import javax.inject.Inject
+
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
@@ -30,7 +34,6 @@ class MainActivity : AppCompatActivity() {
     val searchlist = ArrayList<SearchResultsItem>()
     private lateinit var adapter: SearchResultAdapter
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AndroidInjection.inject(this)
@@ -41,18 +44,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initializeview() {
+
         mainViewModel = ViewModelProviders.of(this, viewModelFactory).get(MainViewModel::class.java)
         setupRecy()
 
-        mainViewModel.loadMoreMovies(1)
-
         mainViewModel.getMoviesLiveData().observe(this, Observer { resource ->
-            if(resource.isLoading){
+            if (resource.isLoading) {
                 binding.progress.visibility = View.VISIBLE
-            }else
+            } else
                 if (resource.isSuccess) {
                     binding.progress.visibility = View.GONE
-                    adapter.setSearchResultsItemList(resource.data as MutableList<SearchResultsItem>)
+                    Log.e(TAG, "initializeview: " )
+                    //  adapter.setSearchResultsItemList(resource.data as MutableList<SearchResultsItem>)
+                    adapter.setItems(resource.data as MutableList<SearchResultsItem>)
                 }
         })
 
@@ -66,18 +70,50 @@ class MainActivity : AppCompatActivity() {
         binding.recymain.adapter = adapter
         adapter.notifyDataSetChanged()
 
-//        binding.recymain.addOnScrollListener(object : RecyclerViewPaginator(binding.recymain) {
-//            override val isLastPage: Boolean
-//                get() = moviesListViewModel.isLastPage()
-//
-//            override fun loadMore(page: Long) {
-//                moviesListViewModel.loadMoreMovies(page)
-//            }
-//
-//            override fun loadFirstData(page: Long) {
-//                displayLoader()
-//                moviesListViewModel.loadMoreMovies(page)
-//            }
-//        })
+        binding.recymain.addOnScrollListener(object : RecyclerViewPaginator(binding.recymain) {
+            override val isLastPage: Boolean
+                get() = mainViewModel.isLastPage()
+
+            override fun loadMore(page: Long) {
+                Log.e(TAG, "loadMore() called with: page = $page")
+                mainViewModel.loadMoreMovies(page)
+            }
+
+            override fun loadFirstData(page: Long) {
+                Log.e(TAG, "loadFirstData() called with: page = $page")
+                mainViewModel.loadMoreMovies(page)
+            }
+        })
+
+        adapter.setOnItemClickListener(object : SearchResultAdapter.OnItemClickListener {
+            override fun onItemClick(view: View?, position: Int) {
+                val movie = adapter.searchResultsItem[position]
+                Log.e(TAG, "onItemClick: "+movie )
+                val intent = Intent(this@MainActivity, DetailActivity::class.java)
+                intent.putExtra("movie", movie)
+                intent.putExtra("helllo", "1")
+                startActivity(intent)
+            }
+
+        })
+
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.dashboard, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle item selection
+        return when (item.itemId) {
+            R.id.action_search -> {
+                val into = Intent(this,SearchActivity::class.java)
+                startActivity(into)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 }
