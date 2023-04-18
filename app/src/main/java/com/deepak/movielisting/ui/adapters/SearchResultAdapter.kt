@@ -38,6 +38,7 @@ class SearchResultAdapter(
         val imageUrl = mSearchResultsItem.getFormattedPosterPath()
         Picasso.get().load(imageUrl).into(holder.itemView.iviamge)
 
+
         if (position == currentPos) {
             // selected true
         } else {
